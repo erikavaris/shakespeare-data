@@ -42,7 +42,9 @@ def delete_entrance_exits(scene):
 
 
 def get_dialogues(scene):
-    # split scenes into dialogue, with character_name + line
+    '''
+    Split scenes into dialogue, with character_name + line
+    '''
     dialogues = []
     lines_with_characters = re.split(character, scene)
     for i, line in enumerate(lines_with_characters):
@@ -54,6 +56,13 @@ def get_dialogues(scene):
 
 
 def group_dialogues(dialogues, tokenizer, taskname='eme-seq2seq', max_input_length=1024):
+    '''Puts dialogues into pairs of character line "context" and character line
+    "response". Gradually builds up the previous context to include multiple
+    previous lines, up to the max_input_length of tokens.
+    Requires the use of an already instantiated, pre-trained tokenizer from the
+    transformers library. To use a different tokenizer, this code will
+    need to be adjusted.
+    '''
     graduated_blocks = []
     for i, d in enumerate(dialogues):
         if i == 0:
@@ -85,6 +94,10 @@ def group_dialogues(dialogues, tokenizer, taskname='eme-seq2seq', max_input_leng
 
 
 def save_text_as_dialogues(textfile, output_dir):
+    '''Takes a single play textfile and creates
+    dialogue jsonlines, including basic preprocessing
+    (deleting scene headings, entrances/exits).
+    '''
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     scenes = get_scenes(textfile)
@@ -101,6 +114,8 @@ def save_text_as_dialogues(textfile, output_dir):
 
 
 def preprocess_to_groups(play_dialogue_dir, output_dir, tokenizer, max_input_length=1024):
+    '''Helper function to do dialogue groupings on a play directory of dialogues
+    '''
     scene_files = glob.glob(play_dialogue_dir+'/*')
     for i, scene_f in enumerate(scene_files):
         dialogues = read_json_lines(scene_f)
@@ -113,6 +128,9 @@ def preprocess_to_groups(play_dialogue_dir, output_dir, tokenizer, max_input_len
 
 
 def text_to_dialogues(text_data_dir, output_dir):
+    '''Helper function to prep dialogues on the full
+    play directory.
+    '''
     list_of_textfiles = glob.glob(text_data_dir+'/*.txt')
     for textfile in list_of_textfiles:
         save_text_as_dialogues(textfile, os.path.join(output_dir, os.path.basename(textfile).split('.txt')[0]))
@@ -129,7 +147,7 @@ def dialogues_to_groups(plays_dialogue_dir, output_dir, tokenizer, max_input_len
 def file_objects_at_folder(foldername, extension='.json'):
     '''
     Pulls all files in a folder, even if embedded several layers deep,
-    and allows for extension specification, starting frame and ending frame.
+    and allows for extension specification.
 
     Params
     ------
@@ -158,6 +176,11 @@ def read_json_lines(jsonlines_filename):
 
 
 def add_taskname(dialogues_dir):
+    '''Old function for adding the NeMO expected
+    taskname field. Shouldn't be necessary anymore,
+    as the taskname has been incorporated into the
+    group_dialouges() function.
+    '''
     dialogue_files = file_objects_at_folder(dialogues_dir, extension='.json')
     for filename in dialogue_files:
         # read the json lines
@@ -170,7 +193,11 @@ def add_taskname(dialogues_dir):
 
 
 def get_token_counts(dialogue_jsons):
-    # find highest context_length
+    '''
+    find highest context_length, assuming
+    the tokenizer has already been run and context length
+    been calculated
+    '''
     print('Longest context in these dialogues:', max([dialogue['context_len'] for dialogue in dialogue_jsons]))
     return dialogue_jsons
 
@@ -241,12 +268,12 @@ def create_train_and_val_directories(data_directory, output_dir):
 
 
 def clean_up_context_len(data_directory):
-    '''stupid Nemo can't handle extra fields at all,
+    '''stupid NeMO can't handle extra fields at all,
     so they need to be removed. Ideally this would be
     done in the dataloading scripts that they are using,
     but everything is so abstracted as to be a pain to
-    modify. 
-    TODO: re-build the NeMo specific models and 
+    modify.
+    TODO: re-build the NeMo specific models and
     dataloading so that this can be modified there instead
     of here.
     '''
@@ -265,6 +292,11 @@ def clean_up_context_len(data_directory):
 
 
 def get_total_training_tokens(train_dir, tokenizer):
+    '''Info yielding function on the total number
+    of tokens in the prepped training dataset of seq2seq
+    pairs.
+    Tokenizer takes a long time. Don't run this over and over.
+    '''
     all_files = file_objects_at_folder(train_dir, extension='.json')
     total_tokens = 0
     for f in all_files:
@@ -278,6 +310,10 @@ def get_total_training_tokens(train_dir, tokenizer):
 
 
 def get_total_dataset_tokens(dialogue_dir, tokenizer):
+    ''' Info yielding function on the total number
+    of tokens in the full dataset of dialogue character lines.
+    Tokenizer takes a long time; don't run this over and over.
+    '''
     all_files = file_objects_at_folder(dialogue_dir, extension='.json')
     total_tokens = 0
     for f in all_files:
@@ -290,7 +326,7 @@ def get_total_dataset_tokens(dialogue_dir, tokenizer):
 
 def main(data_text_directory, dialogue_dir, grouped_dir, splits_dir, max_input_length=1024):
     ''' Just to show how to run all the preprocessing
-    together to get the final prepared dataset
+    together to get the final prepared dataset.
     '''
     text_to_dialogues(data_text_directory, dialogue_dir)
     tokenizer = AutoTokenizer.from_pretrained('gpt2')
