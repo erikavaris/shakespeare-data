@@ -1,6 +1,6 @@
 # Shakespeare data
 
-This repo contains plain text versions of the complete works of Shakespeare, copied & pasted from this website: [http://shakespeare.mit.edu/]{http://shakespeare.mit.edu/}. The html from that website as well as the plain text copies included here are considered in the public domain. 
+This repo contains plain text versions of the complete works of Shakespeare, copied & pasted from this website: [http://shakespeare.mit.edu/](http://shakespeare.mit.edu/). The html from that website as well as the plain text copies included here are considered in the public domain. 
 
 The plays and poetry are separated into the respective directories `plays` and `poetry`. 
 

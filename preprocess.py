@@ -14,7 +14,8 @@ exeunt = re.compile(r'((Exit|Exeunt)[\w .?\-\'\",;]*\n)')
 act_scene = re.compile(r'(SCENE[\w .?\"\'\-,;]*\n|ACT[\w .?\"\'\-,;]*\n)')
 
 
-def get_scenes(filename):# divide by scene to get local dialogues
+def get_scenes(filename):
+# divide by scene to get local dialogues
     with open(filename, 'r') as f:
         text = f.read()
     scenes = re.split(act_scene, text)
@@ -22,6 +23,8 @@ def get_scenes(filename):# divide by scene to get local dialogues
 
 
 def delete_scene_headings(scenes):
+    '''Takes out the "SCENE I" and "ACT I" type headers
+    '''
     for i, scene in enumerate(scenes):
         if re.match(act_scene, scene):
             scenes.pop(i)
@@ -31,6 +34,8 @@ def delete_scene_headings(scenes):
 
 
 def delete_entrance_exits(scene):
+    ''' Takes out character entrances and exits
+    '''
     scene_stripped = re.sub(enter, '', scene)
     scene_stripped = re.sub(exeunt, '', scene_stripped)
     return scene_stripped
@@ -79,10 +84,9 @@ def group_dialogues(dialogues, tokenizer, taskname='eme-seq2seq', max_input_leng
     return graduated_blocks
 
 
-def save_text_as_dialogues(textfile, output_dir, tokenizer_name='gpt2'):
+def save_text_as_dialogues(textfile, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
     scenes = get_scenes(textfile)
     scenes = delete_scene_headings(scenes)
     for i, scene in enumerate(scenes):
@@ -286,7 +290,7 @@ def get_total_dataset_tokens(dialogue_dir, tokenizer):
 
 def main(data_text_directory, dialogue_dir, grouped_dir, splits_dir, max_input_length=1024):
     ''' Just to show how to run all the preprocessing
-    together to get the final prepared dataset for NeMo
+    together to get the final prepared dataset
     '''
     text_to_dialogues(data_text_directory, dialogue_dir)
     tokenizer = AutoTokenizer.from_pretrained('gpt2')
