@@ -15,10 +15,25 @@ After that, you should be able to clone the repository as per usual.
 
 ## Preprocessing script
 
+
 The `preprocessing.py` script may be used to prepare the plain text files for language modeling, for dialogue. 
 NOTE: At this time, preprocessing is included only for the play dialogues. No prep has yet been done for preprocessing the poetry for language modeling.
 
-Some useful functions included there:
+### Requirements
+
+To use this preprocessing script, some requirements:
+
+```
+python 3.x
+jsonlines
+matplotlib
+transformers==4.21.3
+```
+
+
+### Usage
+
+Some useful functions included in the script:
 
 - `text_to_dialogues()`: takes a directory of text files (like the `plays` dir) and produces a new directory of jsonlines dialogues, in the format: 
 
