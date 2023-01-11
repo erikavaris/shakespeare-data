@@ -83,7 +83,7 @@ def group_dialogues(dialogues, tokenizer, taskname='eme-seq2seq', max_input_leng
                 while len_tokens > max_input_length:
                     print('inside while loop; truncating')
                     # truncate from the beginning
-                    context = ' '.join([k['character_and_line'] for k in dialogues[ind+1:i]])
+                    context = ' \n\n '.join([k['character_and_line'] for k in dialogues[ind+1:i]])
                     tokenized = tokenizer(context)['input_ids']
                     len_tokens = len(tokenized)
                     ind += 1
@@ -176,8 +176,8 @@ def read_json_lines(jsonlines_filename):
 
 
 def add_taskname(dialogues_dir):
-    '''Old function for adding the NeMO expected
-    taskname field. Shouldn't be necessary anymore,
+    '''Old function for adding the taskname field. 
+    Shouldn't be necessary anymore,
     as the taskname has been incorporated into the
     group_dialouges() function.
     '''
@@ -268,12 +268,13 @@ def create_train_and_val_directories(data_directory, output_dir):
 
 
 def clean_up_context_len(data_directory):
-    '''stupid NeMO can't handle extra fields at all,
-    so they need to be removed. Ideally this would be
-    done in the dataloading scripts that they are using,
-    but everything is so abstracted as to be a pain to
+    '''Function for removing extra fields
+    from the json. Ideally this would be
+    done in the dataloading scripts that the model uses,
+    but everything in that lib is so
+    abstracted as to be a pain to
     modify.
-    TODO: re-build the NeMo specific models and
+    TODO: re-build the specific models and
     dataloading so that this can be modified there instead
     of here.
     '''
